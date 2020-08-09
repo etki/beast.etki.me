@@ -15,4 +15,4 @@ else
 fi
 
 chef export "$POLICYFILE" "$WORKSPACE" --force
-cp -r "$ROOT/data_bags" "$WORKSPACE/data_bags"
+cp -r "$ROOT/data_bags" "$WORKSPACE/"

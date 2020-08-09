@@ -15,3 +15,14 @@ id: yandex-disk
 user: (username)
 password: (password)
 ```
+
+### Transmission
+
+Transmission credentials are stored in same way in 
+`credentials/transmission.json`:
+
+```yaml
+id: transmission
+user: (username)
+password: (password)
+```

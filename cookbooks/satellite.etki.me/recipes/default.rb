@@ -1,0 +1,7 @@
+include_recipe 'satellite.etki.me::setup'
+include_recipe 'satellite.etki.me::docker'
+include_recipe 'satellite.etki.me::mount'
+include_recipe 'satellite.etki.me::yandex-disk'
+include_recipe 'satellite.etki.me::emby'
+# include_recipe 'satellite.etki.me::transmission'
+# include_recipe 'satellite.etki.me::ingress'

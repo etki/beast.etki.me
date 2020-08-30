@@ -1,4 +1,4 @@
-# InSpec test for recipe beast.etki.me::default
+# InSpec test for recipe satellite.etki.me::default
 
 # The InSpec reference, with examples and extensive documentation, can be
 # found at https://www.inspec.io/docs/reference/resources/

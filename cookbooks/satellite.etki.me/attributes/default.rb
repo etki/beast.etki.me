@@ -1,0 +1,7 @@
+default['satellite.etki.me']['paths']['configuration'] = '/etc/etki.me/satellite.etki.me'
+default['satellite.etki.me']['paths']['workspace'] = '/var/etki.me/satellite.etki.me'
+default['satellite.etki.me']['machine']['name'] = 'satellite'
+default['satellite.etki.me']['machine']['domain'] = 'etki.me'
+default['satellite.etki.me']['containers']['network']['name'] = 'joint'
+default['satellite.etki.me']['containers']['images']['nginx']['tag'] = '1.19.2-alpine'
+default['satellite.etki.me']['containers']['images']['emby/embyserver']['tag'] = '4.5.0.22'

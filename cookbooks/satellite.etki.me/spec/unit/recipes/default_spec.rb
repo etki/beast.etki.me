@@ -1,12 +1,12 @@
 #
-# Cookbook:: beast.etki.me
+# Cookbook:: satellite.etki.me
 # Spec:: default
 #
 # Copyright:: 2020, The Authors, All Rights Reserved.
 
 require 'spec_helper'
 
-describe 'beast.etki.me::default' do
+describe 'satellite.etki.me::default' do
   context 'When all attributes are default, on Ubuntu 18.04' do
     # for a complete list of available platforms and versions see:
     # https://github.com/chefspec/fauxhai/blob/master/PLATFORMS.md

@@ -16,22 +16,23 @@ user: (username)
 password: (password)
 ```
 
-### Transmission
-
-Transmission credentials are stored in same way in 
-`credentials/transmission.json`:
-
-```yaml
-id: transmission
-user: (username)
-password: (password)
-```
-
 ### Let's Encrypt!
 
-Only email is expected
+Only email is expected:
 
 ```yaml
 id: letsencrypt
 email: nemyx@uguomeka.рф
 ```
+
+## Users
+
+Each data bag item is expected to have following schema:
+
+```yaml
+id: etki
+name: Etki # optional
+password: kobenardio
+```
+
+Please note that this manages service users, not system users.

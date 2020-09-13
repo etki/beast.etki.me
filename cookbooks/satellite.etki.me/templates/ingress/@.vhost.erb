@@ -4,8 +4,8 @@
   <% addresses.each do |address| %>
     <% if rule.https_access %>
       server {
-        listen 443 ssl;
-        listen [::]:443 ssl;
+        listen 443 ssl http2;
+        listen [::]:443 ssl http2;
 
         server_name <%= address %>;
 
@@ -14,14 +14,23 @@
 
         ssl_stapling on;
         ssl_stapling_verify on;
+        ssl_trusted_certificate "<%= @certificate_directory %>/live/<%= @service.public_address %>/fullchain.pem";
+
+        resolver 8.8.8.8 8.8.4.4 valid=300s;
+        resolver_timeout 5s;
 
         location / {
           proxy_set_header Host $host;
           proxy_set_header X-Real-IP $remote_addr;
           <% if rule.encrypted %>
-            proxy_pass https://<%= @service.private_address %>:<%= rule.port %>;
+            proxy_pass https://<%= @service.private_address %>:<%= rule.port %>/;
           <% else %>
-            proxy_pass http://<%= @service.private_address %>:<%= rule.port %>;
+            proxy_pass http://<%= @service.private_address %>:<%= rule.port %>/;
+          <% end %>
+
+          <% if rule.secured %>
+            auth_basic "<%= @service.name %>";
+            auth_basic_user_file "<%= @user_database %>";
           <% end %>
         }
       }
@@ -41,6 +50,11 @@
             proxy_pass https://<%= @service.private_address %>:<%= rule.port %>;
           <% else %>
             proxy_pass http://<%= @service.private_address %>:<%= rule.port %>;
+          <% end %>
+
+          <% if rule.secured %>
+            auth_basic "<%= @service.name %>";
+            auth_basic_user_file "<%= @user_database %>";
           <% end %>
         }
       }

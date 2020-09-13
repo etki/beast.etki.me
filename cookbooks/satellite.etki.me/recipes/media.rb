@@ -9,12 +9,12 @@ end
 
 groups = %w[video render].map { |name| Etc.getgrnam(name).gid }
 
-satellite_service 'media.entertainment' do
+satellite_service 'media' do
   image 'emby/embyserver'
   interfaces(interfaces)
   ingress([8096])
   mounts([
-    { source: registry.services.state_directory(:emby), target: '/config', writable: true },
+    { source: registry.services.state_directory(:media), target: '/config', writable: true },
     { source: '/media/sdb1/Media', target: '/mount/Storage' },
     { source: '/media/sdb1/Cloud/Yandex.Disk/Media/Music', target: '/mount/Storage/Music' },
   ])

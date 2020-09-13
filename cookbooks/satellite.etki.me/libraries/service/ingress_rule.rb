@@ -5,6 +5,9 @@ module Etki
         # @!attribute port
         #   @return [Integer]
         attr_accessor :port
+        # @!attribute path
+        #   @return [String]
+        attr_accessor :path
         # @!attribute addresses
         #   @return [Array<String>]
         attr_accessor :addresses
@@ -17,18 +20,22 @@ module Etki
         # @!attribute https_access
         #   @return [Boolean]
         attr_accessor :https_access
+        # @!attribute secured Whether or not to protect using basic auth
+        #   @return [Boolean]
+        attr_accessor :secured
 
         def inspect
           Types.examine(self, :port, :addresses, :encrypted, :http_access, :https_access)
         end
 
         class << self
-          def create(port, encrypted: false, http_access: false , https_access: true)
+          def create(port, encrypted: false, http_access: false, https_access: true, secured: false)
             new.tap do |instance|
               instance.port = port
               instance.encrypted = encrypted
               instance.http_access = http_access
               instance.https_access = https_access
+              instance.secured = secured
             end
           end
 
@@ -37,7 +44,10 @@ module Etki
 
             return create(value) if value.is_a?(Integer)
 
-            return create(Hashes.fetch(value, :port), value) if value.is_a?(Hash)
+            if value.is_a?(Hash)
+              port = Hashes.shift(value, :port)
+              return create(port, value)
+            end
 
             raise "Can't use value #{value.inspect} (#{value.class}) for normalization"
           end

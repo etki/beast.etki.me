@@ -1,6 +1,7 @@
 require 'pathname'
 
 resource_name :satellite_container
+provides :satellite_container
 
 property :image, String, required: true
 property :host_name, String, required: false
@@ -12,9 +13,9 @@ property :networks, Array, default: []
 
 default_action :run
 
-action :run do
-  registry = Etki::Satellite::Registry.new(node)
+registry = Etki::Satellite::Registry.new(node)
 
+action :run do
   docker_image new_resource.image do
     tag registry.containers.tag(image)
   end
@@ -50,11 +51,11 @@ action :run do
       Pathname.new(mount.source).children
         .reject(&:directory?)
         .map do |path|
-          {
-            source: path,
-            target: Pathname.new(mount.target).join(path.basename)
-          }
-        end
+        {
+          source: path,
+          target: Pathname.new(mount.target).join(path.basename)
+        }
+      end
     else
       [{ source: path, target: target }]
     end
@@ -68,6 +69,8 @@ action :run do
     end
   end
 
+  network_names = new_resource.networks + ['bridge']
+
   docker_container new_resource.name do
     repo new_resource.image
     tag registry.containers.tag(new_resource.image)
@@ -76,22 +79,26 @@ action :run do
     volumes volumes
     devices devices
     env(new_resource.environment.map { |key, value| "#{key}=#{value}" })
+    network_mode network_names.shift
 
     restart_policy 'unless-stopped'
     action :run
   end
 
-  new_resource.networks.each do |network_name|
+  network_names.each do |network_name|
     docker_network network_name do
       container new_resource.name
       action %i[create connect]
     end
   end
 end
-
-%i[reload delete].each do |action_name|
+%i[reload restart delete].each do |action_name|
   action action_name do
     docker_container new_resource.name do
+      repo new_resource.image
+      tag registry.containers.tag(new_resource.image)
+      host_name(new_resource.host_name) if new_resource.host_name
+
       action action_name
     end
   end

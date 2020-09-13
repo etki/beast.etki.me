@@ -22,6 +22,13 @@ module Etki
           end
           target
         end
+
+        def shift(hash, key)
+          value = fetch(hash, key)
+          hash.delete(key.to_s)
+          hash.delete(key.to_sym)
+          value.is_a?(Array) ? value.shift : value
+        end
       end
     end
   end

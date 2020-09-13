@@ -14,4 +14,3 @@ run_list 'apt::default', 'satellite.etki.me::default'
 
 # Specify a custom source for a single cookbook:
 cookbook 'satellite.etki.me', path: '.'
-cookbook 'ayte-yandex-disk', github: 'ayte-io/cookbook-yandex-disk', branch: 'master'

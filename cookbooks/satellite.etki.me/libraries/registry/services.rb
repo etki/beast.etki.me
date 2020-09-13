@@ -28,12 +28,12 @@ module Etki
 
         def public_address(name)
           value = configuration[:service, name, :public_address]
-          value || "#{name}.#{machine.domain}"
+          value || "#{name}.#{machine.advertised_name}"
         end
 
         def private_address(name)
           value = configuration[:service, name, :private_address]
-          value || "#{name}.#{containers.qualified_network_name}"
+          value || "#{public_address(name)}.#{containers.qualified_network_name}"
         end
 
         # @return [Pathname]
@@ -59,6 +59,10 @@ module Etki
         # @return [Pathname]
         def state_directory(name)
           workspace_path(name, :state)
+        end
+
+        def state_path(name, *path)
+          state_directory(name).join(*path.map(&:to_s))
         end
       end
     end

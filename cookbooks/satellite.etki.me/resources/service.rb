@@ -1,4 +1,5 @@
 resource_name :satellite_service
+provides :satellite_service
 
 property :image, String, required: true
 property :interfaces, Array, default: []
@@ -57,6 +58,10 @@ action_class do
 
   def network_names
     new_resource.networks || [registry.containers.qualified_network_name]
+  end
+
+  def container_name
+    public_address
   end
 end
 
@@ -117,8 +122,8 @@ action_mapping = { run: :create }
       end
     end
 
-    satellite_container service.name do
-      host_name service.public_address
+    satellite_container container_name do
+      host_name container_name
       image new_resource.image
       interfaces service.interfaces
       mounts service.mounts
@@ -130,14 +135,18 @@ action_mapping = { run: :create }
     end
 
     unless service.ingress.empty?
-      edit_resource(:satellite_ingress, 'default') do
-        services(services + [service])
+      with_run_context :root do
+        edit_resource(:satellite_ingress, 'default') do
+          services(services + [service])
+          action :nothing
+          delayed_action :run
+        end
       end
     end
 
     certbot_action = service.ingress.any?(&:https_access) ? :create : :delete
 
-    systemd_name = Etki::Satellite::Constants.name(service.public_address, :certbot)
+    systemd_name = Etki::Satellite::Constants.name(service.name, :certbot)
 
     email = data_bag_item('credentials', 'letsencrypt')['email']
 
@@ -174,9 +183,11 @@ action_mapping = { run: :create }
   end
 end
 
-action :reload do
-  satellite_container new_resource.name do
-    image new_resource.image
-    action :reload
+%i[restart reload].each do |action_name|
+  action action_name do
+    satellite_container container_name do
+      image new_resource.image
+      action action_name
+    end
   end
 end

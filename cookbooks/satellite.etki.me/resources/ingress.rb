@@ -1,8 +1,9 @@
 resource_name :satellite_ingress
+provides :satellite_ingress
 
 property :services, Array, default: []
 
-default_action :run
+default_action :nothing
 
 action_mapping = { run: :create }
 
@@ -14,6 +15,7 @@ action_mapping = { run: :create }
     configuration_override_directory = configuration_directory.join('override')
     vhosts_directory = configuration_directory.join('vhosts.d')
     default_vhost = vhosts_directory.join('@.vhost')
+    public_address = registry.services.public_address(:ingress)
 
     [vhosts_directory, configuration_override_directory].each do |path|
       directory path.to_s do
@@ -36,9 +38,12 @@ action_mapping = { run: :create }
       action common_action
     end
 
+    user_database = '/etc/nginx/users.htpasswd'
+
     mounts = [
       { source: configuration_override_directory, target: '/etc/nginx/conf.d' },
-      { source: vhosts_directory, target: '/etc/nginx/vhosts.d' }
+      { source: vhosts_directory, target: '/etc/nginx/vhosts.d' },
+      { source: registry.paths.configuration.join('users.htpasswd'), target: user_database }
     ]
 
     # @type [Etki::Satellite::Service] service
@@ -55,9 +60,10 @@ action_mapping = { run: :create }
         variables(
           service: service,
           certificate_directory: certificate_directory,
-          webroot: webroot
+          webroot: webroot,
+          user_database: user_database
         )
-        notifies :reload, 'satellite_service[ingress]', :delayed
+        notifies :reload, "satellite_container[#{registry.services.public_address(:ingress)}]", :delayed
       end
     end
 
@@ -69,7 +75,7 @@ action_mapping = { run: :create }
         },
         Service: {
           Type: 'oneshot',
-          ExecStart: 'docker kill -s HUP ingress'
+          ExecStart: "docker kill -s HUP #{public_address}"
         }
       )
       action common_action
@@ -80,10 +86,12 @@ action_mapping = { run: :create }
       action common_action
     end
 
-    satellite_service 'ingress' do
+    satellite_container public_address do
       image 'nginx'
       interfaces([80, 443])
-      mounts(mounts)
+      mounts(mounts.map { |mount| Etki::Satellite::Service::Mount.normalize(mount) })
+      networks [registry.containers.qualified_network_name]
+
       action action_name
     end
   end

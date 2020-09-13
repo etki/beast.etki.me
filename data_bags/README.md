@@ -26,3 +26,12 @@ id: transmission
 user: (username)
 password: (password)
 ```
+
+### Let's Encrypt!
+
+Only email is expected
+
+```yaml
+id: letsencrypt
+email: nemyx@uguomeka.рф
+```

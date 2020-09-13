@@ -4,8 +4,8 @@ set -euo pipefail
 
 ROOT="$( cd "$( dirname "$( dirname "${BASH_SOURCE[0]}" )" )" >/dev/null 2>&1 && pwd )"
 
-POLICYFILE="$ROOT/cookbooks/beast.etki.me/Policyfile.lock.json"
-POLICYFILE_LOCK="$ROOT/cookbooks/beast.etki.me/Policyfile.lock.json"
+POLICYFILE="$ROOT/cookbooks/satellite.etki.me/Policyfile.rb"
+POLICYFILE_LOCK="$ROOT/cookbooks/satellite.etki.me/Policyfile.lock.json"
 WORKSPACE="$ROOT/workspace"
 
 if [ -f "$POLICYFILE_LOCK" ]; then

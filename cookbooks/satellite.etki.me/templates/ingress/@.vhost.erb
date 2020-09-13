@@ -1,0 +1,64 @@
+<% @service.ingress.each do |rule| %>
+  <% addresses = rule.addresses || [] %>
+  <% addresses = [@service.public_address] if addresses.empty? %>
+  <% addresses.each do |address| %>
+    <% if rule.https_access %>
+      server {
+        listen 443 ssl;
+        listen [::]:443 ssl;
+
+        server_name <%= address %>;
+
+        ssl_certificate "<%= @certificate_directory %>/live/<%= @service.public_address %>/fullchain.pem";
+        ssl_certificate_key "<%= @certificate_directory %>/live/<%= @service.public_address %>/privkey.pem";
+
+        ssl_stapling on;
+        ssl_stapling_verify on;
+
+        location / {
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          <% if rule.encrypted %>
+            proxy_pass https://<%= @service.private_address %>:<%= rule.port %>;
+          <% else %>
+            proxy_pass http://<%= @service.private_address %>:<%= rule.port %>;
+          <% end %>
+        }
+      }
+    <% end %>
+
+    <% if rule.http_access %>
+      server {
+        listen 80;
+        listen [::]:80;
+
+        server_name <%= address %>;
+
+        location / {
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          <% if rule.encrypted %>
+            proxy_pass https://<%= @service.private_address %>:<%= rule.port %>;
+          <% else %>
+            proxy_pass http://<%= @service.private_address %>:<%= rule.port %>;
+          <% end %>
+        }
+      }
+    <% elsif rule.https_access %>
+      server {
+        listen 80;
+        listen [::]:80;
+
+        server_name <%= address %>;
+
+        location / {
+          return 301 https://$host$request_uri;
+        }
+
+        location /.well-known {
+          root <%= @webroot %>;
+        }
+      }
+    <% end %>
+  <% end %>
+<% end %>

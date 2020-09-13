@@ -1,3 +1,3 @@
-# beast.etki.me
+# satellite.etki.me
 
-This cookbook holds actual run list to converge my precious home server.
+This cookbook holds actual recipes to converge my precious home server.
